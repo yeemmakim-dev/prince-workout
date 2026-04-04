@@ -245,7 +245,7 @@ body{font-family:'DotGothic16',monospace;background:var(--bg);color:var(--tx);ba
 <button class="tab active" onclick="switchTab(0)"><span class="tab-icon">⚔️</span>미션</button>
 <button class="tab" onclick="switchTab(1)"><span class="tab-icon">🏪</span>길드 상점</button>
 <button class="tab" onclick="switchTab(2)"><span class="tab-icon">📜</span>기록</button>
-<button class="tab" onclick="switchTab(3)"><span class="tab-icon">⚙️</span>보관함</button>
+<button class="tab" onclick="switchTab(3)"><span class="tab-icon">⚙️</span>설정</button>
 </div></div>
 <script>
 // === QUEST COMMENTS ===
@@ -320,7 +320,10 @@ function generateRoutine(idx){
 var seed=idx*7919+31;var rng=seededRand(seed);
 var labels=['A','C','B'];var icons=['⚔️','🗡️','🛡️'];var li=idx%3;
 var base=[pickRandom(POOL.compound,1,rng)[0],pickRandom(POOL.hinge,1,rng)[0],pickRandom(rng()<0.5?POOL.pull:POOL.push,1,rng)[0],pickRandom(POOL.core,1,rng)[0]];
-var exercises=base.map(function(ex,i){var key=idx+'_'+i;if(S.swapped&&S.swapped[key])return S.swapped[key];return ex;});
+var exercises=base.map(function(ex,i){var key=idx+'_'+i;var e=S.swapped&&S.swapped[key]?S.swapped[key]:ex;
+var c=S.config||{sets:3,reps:10,coreSets:2,coreReps:10};
+var isCore=i===3;
+return {name:e.name,sets:isCore?c.coreSets:c.sets,reps:isCore?(typeof e.reps==='string'?e.reps:c.coreReps):(typeof e.reps==='string'?e.reps:c.reps),how:e.how};});
 return {type:'strength',name:'근력 퀘스트 '+labels[li],icon:icons[li],short:'근력'+labels[li],exercises:exercises};
 }
 var CARDIO_OPTIONS=[
@@ -351,6 +354,7 @@ if(!S.customPool)S.customPool=[];
 if(!S.gp)S.gp=0;
 if(!S.spentGp)S.spentGp=0;
 if(!S.shop)S.shop=[];
+if(!S.config)S.config={sets:3,reps:10,coreSets:2,coreReps:10};
 // Migrate old str/sta to gp
 if(S.str||S.sta){S.gp=(S.str||0)*GP_STR+(S.sta||0)*GP_STA;delete S.str;delete S.sta;S.spentGp=(S.spentStr||0)*GP_STR+(S.spentSta||0)*GP_STA;delete S.spentStr;delete S.spentSta;}
 // Migrate old shop items
@@ -726,11 +730,35 @@ function selectDay(d){calSelected=calSelected===d?null:d;renderCalendar()}
 function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--}calSelected=null;renderCalendar()}
 function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++}calSelected=null;renderCalendar()}
 
-// === SETTINGS TAB (보관함) ===
+// === SETTINGS TAB ===
 function renderWeight(){
-var h='<div class="header"><h1>⚙️ 보관함</h1>';
-h+='<div class="header-sub">데이터 관리</div></div>';
+var c=S.config||{sets:3,reps:10,coreSets:2,coreReps:10};
+var h='<div class="header"><h1>⚙️ 설정</h1>';
+h+='<div class="header-sub">운동 설정 · 데이터 관리</div></div>';
 h+=renderGpBar();
+// 운동 설정
+h+='<div style="margin:12px 0;padding:14px;background:var(--card);border:3px solid var(--border);border-radius:0;box-shadow:var(--shadow)">';
+h+='<div style="font-size:13px;color:var(--gold2);margin-bottom:10px;text-align:center;letter-spacing:2px">⚔️ 운동 설정</div>';
+h+='<div style="display:flex;flex-direction:column;gap:10px">';
+// 일반 운동
+h+='<div style="font-size:11px;color:var(--tm);margin-bottom:2px">일반 운동 (컴파운드 / 힌지 / 푸시 / 풀)</div>';
+h+='<div style="display:flex;gap:12px;align-items:center">';
+h+='<div style="flex:1;display:flex;align-items:center;gap:6px"><label style="font-size:12px;color:var(--tx);white-space:nowrap">세트</label>';
+h+='<input type="number" id="cfg-sets" value="'+c.sets+'" min="1" max="10" style="flex:1;border:3px solid var(--border);border-radius:0;padding:8px;font-size:14px;text-align:center;background:var(--card);color:var(--tx);font-family:inherit"></div>';
+h+='<div style="flex:1;display:flex;align-items:center;gap:6px"><label style="font-size:12px;color:var(--tx);white-space:nowrap">횟수</label>';
+h+='<input type="number" id="cfg-reps" value="'+c.reps+'" min="1" max="50" style="flex:1;border:3px solid var(--border);border-radius:0;padding:8px;font-size:14px;text-align:center;background:var(--card);color:var(--tx);font-family:inherit"></div>';
+h+='</div>';
+// 코어 운동
+h+='<div style="font-size:11px;color:var(--tm);margin-bottom:2px;margin-top:4px">코어 운동</div>';
+h+='<div style="display:flex;gap:12px;align-items:center">';
+h+='<div style="flex:1;display:flex;align-items:center;gap:6px"><label style="font-size:12px;color:var(--tx);white-space:nowrap">세트</label>';
+h+='<input type="number" id="cfg-core-sets" value="'+c.coreSets+'" min="1" max="10" style="flex:1;border:3px solid var(--border);border-radius:0;padding:8px;font-size:14px;text-align:center;background:var(--card);color:var(--tx);font-family:inherit"></div>';
+h+='<div style="flex:1;display:flex;align-items:center;gap:6px"><label style="font-size:12px;color:var(--tx);white-space:nowrap">횟수</label>';
+h+='<input type="number" id="cfg-core-reps" value="'+c.coreReps+'" min="1" max="50" style="flex:1;border:3px solid var(--border);border-radius:0;padding:8px;font-size:14px;text-align:center;background:var(--card);color:var(--tx);font-family:inherit"></div>';
+h+='</div>';
+h+='<button class="btn-gold" onclick="saveConfig()" style="margin-top:6px">💾 저장</button>';
+h+='</div></div>';
+// 데이터 관리
 h+='<div style="margin:14px 0;display:flex;flex-direction:column;gap:6px">';
 h+='<button class="btn-ghost" onclick="exportBackup()">📦 데이터 백업</button>';
 h+='<label class="btn-ghost" style="text-align:center;cursor:pointer">📥 데이터 복원<input type="file" accept=".json" style="display:none" onchange="importBackup(this)"></label>';
@@ -742,6 +770,14 @@ function saveWt(){
 var v=parseFloat(document.getElementById('wti').value);if(!v||v<20||v>300)return;
 var now=new Date();S.weights.push({kg:v,date:(now.getFullYear())+'.'+(now.getMonth()+1)+'.'+now.getDate()});
 save();renderCalendar();toast(v+'kg 저장!');
+}
+function saveConfig(){
+var s=parseInt(document.getElementById('cfg-sets').value)||3;
+var r=parseInt(document.getElementById('cfg-reps').value)||10;
+var cs=parseInt(document.getElementById('cfg-core-sets').value)||2;
+var cr=parseInt(document.getElementById('cfg-core-reps').value)||10;
+S.config={sets:Math.max(1,Math.min(10,s)),reps:Math.max(1,Math.min(50,r)),coreSets:Math.max(1,Math.min(10,cs)),coreReps:Math.max(1,Math.min(50,cr))};
+save();render();toast('운동 설정 저장! ⚔️');
 }
 function drawChart(){
 var canvas=document.getElementById('wtCanvas');if(!canvas)return;
