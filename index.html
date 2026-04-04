@@ -362,6 +362,7 @@ if(!S.spentGp)S.spentGp=0;
 if(!S.shop)S.shop=[];
 if(!S.config)S.config={sets:3,reps:10,coreSets:2,coreReps:10,cardioDur:25};
 if(!S.customCardio)S.customCardio=[];
+if(S.strChoice===undefined)S.strChoice=null;
 // Migrate old str/sta to gp
 if(S.str||S.sta){S.gp=(S.str||0)*GP_STR+(S.sta||0)*GP_STA;delete S.str;delete S.sta;S.spentGp=(S.spentStr||0)*GP_STR+(S.spentSta||0)*GP_STA;delete S.spentStr;delete S.spentSta;}
 // Migrate old shop items
@@ -474,7 +475,32 @@ h+='<button class="btn-ghost" style="margin-top:6px" onclick="pickCardio(null)">
 }
 if(S.idx>0) h+='<button class="btn-skip" onclick="goBack()" style="margin-top:4px">↩ 되돌리기</button>';
 h+='</div>';
+} else if(S.strChoice===null){
+// 근력 타입 선택
+h+='<div class="walk-card">';
+h+='<h2>⚔️ 근력 퀘스트 선택</h2><p>오늘의 수련 방식을 선택하세요</p>';
+h+='<div style="display:flex;flex-direction:column;gap:6px;margin:8px 0">';
+h+='<button class="btn-ghost" style="text-align:left;padding:12px" onclick="pickStrType(\'crossfit\')">';
+h+='<strong>🏋️ 크로스핏 수업</strong><br>';
+h+='<span style="font-size:10px;color:var(--tm)">수업 완료 후 한 번에 퀘스트 클리어</span></button>';
+h+='<button class="btn-ghost" style="text-align:left;padding:12px" onclick="pickStrType(\'gym\')">';
+h+='<strong>💪 짐 워크아웃</strong><br>';
+h+='<span style="font-size:10px;color:var(--tm)">개별 운동 세트를 하나씩 수행</span></button>';
+h+='</div>';
+if(S.idx>0) h+='<button class="btn-skip" onclick="goBack()" style="margin-top:4px">↩ 되돌리기</button>';
+h+='</div>';
+} else if(S.strChoice==='crossfit'){
+// 크로스핏 — 한번에 완료
+h+='<div class="walk-card">';
+h+='<h2>🏋️ 크로스핏 수업</h2>';
+h+='<p>'+r.icon+' '+r.name+'</p>';
+h+='<div style="font-size:13px;color:var(--gold2);font-weight:700;margin:8px 0">💰 성공 보수: '+GP_STR+' GP</div>';
+h+='<button class="btn-gold" onclick="completeCrossfit()">수업 완료! +'+GP_STR+' GP</button>';
+h+='<button class="btn-ghost" style="margin-top:6px" onclick="pickStrType(null)">다른 방식 선택</button>';
+if(S.idx>0) h+='<button class="btn-skip" onclick="goBack()" style="margin-top:4px">↩ 되돌리기</button>';
+h+='</div>';
 } else {
+// 짐 워크아웃 — 기존 세트별 수행
 var totalSets=0,doneSets=0;
 r.exercises.forEach(function(ex,i){for(var s=0;s<ex.sets;s++){totalSets++;if(S.sets[i+'_'+s])doneSets++;}});
 var pct=totalSets?Math.round(doneSets/totalSets*100):0;
@@ -851,13 +877,19 @@ render();
 function togHow(btn){var txt=btn.nextElementSibling;if(txt.style.display==='block'){txt.style.display='none';btn.textContent='방법 보기 →';}else{txt.style.display='block';btn.textContent='접기';}}
 function addHistory(r,gpEarned){var now=new Date();S.history.push({name:r.name,icon:r.icon,year:now.getFullYear(),month:now.getMonth(),day:now.getDate(),date:(now.getMonth()+1)+'/'+now.getDate(),gpEarned:gpEarned});}
 function pickCardio(ci){S.cardioChoice=ci;save();render();}
+function pickStrType(type){S.strChoice=type;save();render();}
+function completeCrossfit(){
+var r=curRoutine();S.gp+=GP_STR;
+addHistory(r,GP_STR);S.strChoice=null;save();
+showCompletePopupCustom(r.icon+' '+r.name+' (크로스핏)',GP_STR);
+}
 function completeCardio(ci){
 var c=getAllCardio()[ci];S.gp+=GP_STA;
 addHistory({name:c.name,icon:c.icon},GP_STA);
 S.cardioChoice=null;save();
 showCompletePopupCustom(c.icon+' '+c.name,GP_STA);render();
 }
-function nextRoutine(doNow){S.idx++;S.sets={};S.cardioChoice=null;S.extras=[];save();if(doNow)toast(curRoutine().icon+' '+curRoutine().name+' 시작!');else toast('다음에 할게요!');render();}
+function nextRoutine(doNow){S.idx++;S.sets={};S.cardioChoice=null;S.strChoice=null;S.extras=[];save();if(doNow)toast(curRoutine().icon+' '+curRoutine().name+' 시작!');else toast('다음에 할게요!');render();}
 function togExtraSet(ei,si){S.sets['ex_'+ei+'_'+si]=!S.sets['ex_'+ei+'_'+si];save();render();}
 function showAddExtraModal(){
 var cats=[{key:'compound',label:'🏋️ 복합'},{key:'hinge',label:'🍑 힌지'},{key:'pull',label:'💪 당기기'},{key:'push',label:'✊ 밀기'},{key:'core',label:'🔥 코어'}];
@@ -921,7 +953,7 @@ save();closeModal();render();toast(name+' 추가! 🏃');
 } else {toast('이미 등록된 운동이에요!');closeModal();}
 }
 function goBack(){
-if(S.idx>0){S.idx--;S.sets={};S.cardioChoice=null;
+if(S.idx>0){S.idx--;S.sets={};S.cardioChoice=null;S.strChoice=null;
 if(S.history.length>0){var last=S.history[S.history.length-1];var now=new Date();
 if(last.year===now.getFullYear()&&last.month===now.getMonth()&&last.day===now.getDate()){
 if(last.gpEarned)S.gp-=last.gpEarned;S.history.pop();}}
