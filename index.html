@@ -333,9 +333,9 @@ var CARDIO_OPTIONS=[
 {name:'줄넘기',icon:'🤸‍♂️',dur:'15-20분',desc:'고강도 전신 유산소'}
 ];
 function getAllCardio(){
-var dur=(S.config&&S.config.cardioDur)?S.config.cardioDur+'분':null;
-var list=CARDIO_OPTIONS.map(function(c){return {name:c.name,icon:c.icon,dur:dur||c.dur,desc:c.desc}});
-(S.customCardio||[]).forEach(function(c){list.push({name:c.name,icon:c.icon||'🏃',dur:dur||c.dur||(S.config.cardioDur+'분'),desc:c.desc||'커스텀 유산소'})});
+var durs=(S.config&&S.config.cardioDurs)||{};
+var list=CARDIO_OPTIONS.map(function(c){return {name:c.name,icon:c.icon,dur:durs[c.name]?durs[c.name]+'분':c.dur,desc:c.desc}});
+(S.customCardio||[]).forEach(function(c){list.push({name:c.name,icon:c.icon||'🏃',dur:durs[c.name]?durs[c.name]+'분':(c.dur||'25분'),desc:c.desc||'커스텀 유산소'})});
 return list;
 }
 function generateCardio(idx){
@@ -765,23 +765,21 @@ h+='<input type="number" id="cfg-core-sets" value="'+c.coreSets+'" min="1" max="
 h+='<div style="flex:1;display:flex;align-items:center;gap:6px"><label style="font-size:12px;color:var(--tx);white-space:nowrap">횟수</label>';
 h+='<input type="number" id="cfg-core-reps" value="'+c.coreReps+'" min="1" max="50" style="flex:1;border:3px solid var(--border);border-radius:0;padding:8px;font-size:14px;text-align:center;background:var(--card);color:var(--tx);font-family:inherit"></div>';
 h+='</div>';
-// 유산소 설정
-h+='<div style="font-size:11px;color:var(--tm);margin-bottom:2px;margin-top:4px">유산소 운동 시간 (분)</div>';
-h+='<div style="display:flex;gap:12px;align-items:center">';
-h+='<div style="flex:1;display:flex;align-items:center;gap:6px"><label style="font-size:12px;color:var(--tx);white-space:nowrap">시간</label>';
-h+='<input type="number" id="cfg-cardio-dur" value="'+(c.cardioDur||25)+'" min="5" max="120" style="flex:1;border:3px solid var(--border);border-radius:0;padding:8px;font-size:14px;text-align:center;background:var(--card);color:var(--tx);font-family:inherit"></div>';
-h+='<span style="font-size:12px;color:var(--th)">분</span>';
-h+='</div>';
-// 커스텀 유산소 목록
-if(S.customCardio&&S.customCardio.length>0){
-h+='<div style="font-size:11px;color:var(--tm);margin-top:8px;margin-bottom:4px">추가한 유산소 운동</div>';
-S.customCardio.forEach(function(c,i){
+// 유산소 설정 (개별 시간)
+h+='<div style="font-size:11px;color:var(--tm);margin-bottom:4px;margin-top:4px">🏃 유산소 운동별 시간 (분)</div>';
+var durs=c.cardioDurs||{};
+var allC=CARDIO_OPTIONS.slice();
+(S.customCardio||[]).forEach(function(cc){allC.push({name:cc.name,icon:cc.icon||'🏃',dur:cc.dur||'25분',desc:cc.desc,custom:true})});
+allC.forEach(function(cc,i){
+var defMin=parseInt(cc.dur)||25;
+var curVal=durs[cc.name]||defMin;
 h+='<div style="display:flex;align-items:center;gap:6px;padding:4px 0">';
-h+='<span style="font-size:12px;flex:1">'+c.icon+' '+c.name+'</span>';
-h+='<button onclick="removeCustomCardio('+i+')" style="background:none;border:2px solid var(--red);border-radius:0;color:var(--red);font-size:10px;padding:2px 6px;cursor:pointer;font-family:inherit">삭제</button>';
+h+='<span style="font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+cc.icon+' '+cc.name+'</span>';
+h+='<input type="number" data-cardio-name="'+cc.name+'" value="'+curVal+'" min="5" max="120" style="width:60px;border:3px solid var(--border);border-radius:0;padding:6px;font-size:13px;text-align:center;background:var(--card);color:var(--tx);font-family:inherit">';
+h+='<span style="font-size:11px;color:var(--th)">분</span>';
+if(cc.custom){var ci=i-CARDIO_OPTIONS.length;h+='<button onclick="removeCustomCardio('+ci+')" style="background:none;border:2px solid var(--red);border-radius:0;color:var(--red);font-size:10px;padding:2px 6px;cursor:pointer;font-family:inherit">삭제</button>';}
 h+='</div>';
 });
-}
 h+='<button class="btn-gold" onclick="saveConfig()" style="margin-top:8px">💾 저장</button>';
 h+='</div></div>';
 // 데이터 관리
@@ -802,11 +800,21 @@ var s=parseInt(document.getElementById('cfg-sets').value)||3;
 var r=parseInt(document.getElementById('cfg-reps').value)||10;
 var cs=parseInt(document.getElementById('cfg-core-sets').value)||2;
 var cr=parseInt(document.getElementById('cfg-core-reps').value)||10;
-var cd=parseInt(document.getElementById('cfg-cardio-dur').value)||25;
-S.config={sets:Math.max(1,Math.min(10,s)),reps:Math.max(1,Math.min(50,r)),coreSets:Math.max(1,Math.min(10,cs)),coreReps:Math.max(1,Math.min(50,cr)),cardioDur:Math.max(5,Math.min(120,cd))};
+var durs={};
+document.querySelectorAll('[data-cardio-name]').forEach(function(el){
+var name=el.getAttribute('data-cardio-name');
+var v=parseInt(el.value)||25;
+durs[name]=Math.max(5,Math.min(120,v));
+});
+S.config={sets:Math.max(1,Math.min(10,s)),reps:Math.max(1,Math.min(50,r)),coreSets:Math.max(1,Math.min(10,cs)),coreReps:Math.max(1,Math.min(50,cr)),cardioDurs:durs};
 save();render();toast('운동 설정 저장! ⚔️');
 }
-function removeCustomCardio(i){S.customCardio.splice(i,1);save();render();toast('삭제 완료!');}
+function removeCustomCardio(i){
+var name=S.customCardio[i].name;
+S.customCardio.splice(i,1);
+if(S.config&&S.config.cardioDurs)delete S.config.cardioDurs[name];
+save();render();toast('삭제 완료!');
+}
 function drawChart(){
 var canvas=document.getElementById('wtCanvas');if(!canvas)return;
 var ctx=canvas.getContext('2d');var dpr=window.devicePixelRatio||1;
