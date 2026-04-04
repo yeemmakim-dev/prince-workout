@@ -891,18 +891,22 @@ function togHow(btn){var txt=btn.nextElementSibling;if(txt.style.display==='bloc
 function addHistory(r,gpEarned){var now=new Date();S.history.push({name:r.name,icon:r.icon,year:now.getFullYear(),month:now.getMonth(),day:now.getDate(),date:(now.getMonth()+1)+'/'+now.getDate(),gpEarned:gpEarned});}
 function pickCardio(ci){S.cardioChoice=ci;save();render();}
 function pickStrType(type){S.strChoice=type;save();render();}
+var _completeLock=false;
 function completeCrossfit(){
+if(_completeLock)return;_completeLock=true;setTimeout(function(){_completeLock=false},500);
 var r=curRoutine();S.gp+=GP_STR;
 addHistory(r,GP_STR);S.strChoice=null;save();
 showCompletePopupCustom(r.icon+' '+r.name+' (크로스핏)',GP_STR);
 }
 function completeCardio(ci){
+if(_completeLock)return;_completeLock=true;setTimeout(function(){_completeLock=false},500);
 var c=getAllCardio()[ci];S.gp+=GP_STA;
 addHistory({name:c.name,icon:c.icon},GP_STA);
 S.cardioChoice=null;save();
 showCompletePopupCustom(c.icon+' '+c.name,GP_STA);render();
 }
-function nextRoutine(doNow){S.idx++;S.sets={};S.cardioChoice=null;S.strChoice=null;S.extras=[];save();if(doNow)toast(curRoutine().icon+' '+curRoutine().name+' 시작!');else toast('다음에 할게요!');render();}
+var _nextLock=false;
+function nextRoutine(doNow){if(_nextLock)return;_nextLock=true;setTimeout(function(){_nextLock=false},500);S.idx++;S.sets={};S.cardioChoice=null;S.strChoice=null;S.extras=[];save();if(doNow)toast(curRoutine().icon+' '+curRoutine().name+' 시작!');else toast('다음에 할게요!');render();}
 function togExtraSet(ei,si){S.sets['ex_'+ei+'_'+si]=!S.sets['ex_'+ei+'_'+si];save();render();}
 function showAddExtraModal(){
 var cats=[{key:'compound',label:'🏋️ 복합'},{key:'hinge',label:'🍑 힌지'},{key:'pull',label:'💪 당기기'},{key:'push',label:'✊ 밀기'},{key:'core',label:'🔥 코어'}];
