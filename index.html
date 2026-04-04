@@ -128,8 +128,8 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 .shop-item.unlocked{border-color:var(--gold);background:linear-gradient(135deg,#FFFDF4,#FFF8E0)}
 @media(prefers-color-scheme:dark){.shop-item.unlocked{background:linear-gradient(135deg,#2E2818,#342C1C)}}
 .shop-item-top{display:flex;gap:10px;align-items:center}
-.shop-item-img{width:56px;height:56px;border-radius:6px;object-fit:cover;border:2px solid var(--border);flex-shrink:0;image-rendering:auto}
-.shop-item-img.locked{filter:brightness(.6) grayscale(.4)}
+.shop-item-img{width:72px;height:72px;border-radius:8px;object-fit:cover;border:2px solid var(--border);flex-shrink:0;image-rendering:auto}
+.shop-item-img.locked{filter:none}
 .shop-item.unlocked .shop-item-img{border-color:var(--gold);filter:none}
 .shop-item-info{flex:1;min-width:0}
 .shop-item-name{font-size:14px;font-weight:900}
@@ -150,8 +150,8 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 .mini-shop{margin:8px 0}
 .mini-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--card);border:2px solid var(--border);border-radius:var(--r);margin-bottom:6px;box-shadow:var(--shadow)}
 .mini-item.unlocked{border-color:var(--gold)}
-.mini-item-img{width:36px;height:36px;border-radius:4px;object-fit:cover;border:1.5px solid var(--border)}
-.mini-item-img.locked{filter:brightness(.6) grayscale(.4)}
+.mini-item-img{width:48px;height:48px;border-radius:6px;object-fit:cover;border:1.5px solid var(--border)}
+.mini-item-img.locked{filter:none}
 .mini-item.unlocked .mini-item-img{border-color:var(--gold);filter:none}
 .mini-item-info{flex:1;min-width:0}
 .mini-item-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -395,7 +395,7 @@ else renderWeight();
 // === GP BAR ===
 function renderGpBar(){
 var h='<div class="gp-bar">';
-h+='<div class="gp-coin">🪙</div>';
+h+='<div class="gp-coin">💰</div>';
 h+='<div class="gp-info"><div class="gp-label">GUILD POINT</div>';
 h+='<div class="gp-val">'+getAvailGp()+' <span style="font-size:14px;color:#C8A870">GP</span></div>';
 h+='<div class="gp-avail">총 '+S.gp+' GP 획득</div>';
@@ -459,7 +459,7 @@ h+='</div>';
 } else {
 var cc=CARDIO_OPTIONS[picked];
 h+='<h2>'+cc.icon+' '+cc.name+'</h2><p>'+cc.dur+' · '+cc.desc+'</p>';
-h+='<div style="font-size:13px;color:var(--gold2);font-weight:700;margin:8px 0">🪙 성공 보수: '+GP_STA+' GP</div>';
+h+='<div style="font-size:13px;color:var(--gold2);font-weight:700;margin:8px 0">💰 성공 보수: '+GP_STA+' GP</div>';
 h+='<button class="btn-gold" onclick="completeCardio('+picked+')">미션 완료! +'+GP_STA+' GP</button>';
 h+='<button class="btn-ghost" style="margin-top:6px" onclick="pickCardio(null)">다른 미션 선택</button>';
 }
@@ -571,7 +571,7 @@ h+='<div class="shop-item-top">';
 h+='<img class="shop-item-img locked" src="'+item.img+'" draggable="false">';
 h+='<div class="shop-item-info"><div class="shop-item-name">'+item.name+'</div>';
 if(item.price) h+='<div class="shop-item-price">💰 '+item.price+'</div>';
-h+='<div class="shop-item-cost">🪙 '+item.gpCost+' GP 필요</div>';
+h+='<div class="shop-item-cost">💰 '+item.gpCost+' GP 필요</div>';
 h+='</div>';
 h+='<button onclick="editShopItem('+idx+')" style="background:none;border:none;color:var(--th);cursor:pointer;font-size:11px;padding:4px">✏️</button>';
 h+='</div>';
@@ -596,7 +596,7 @@ h+='</div>';
 }
 h+='<button class="shop-add-btn" onclick="showAddItemModal()">+ 새 보상 등록하기</button>';
 h+='<div style="margin-top:12px;padding:10px;background:var(--sf);border:2px solid var(--border);border-radius:var(--r);font-size:11px;color:var(--th);text-align:center;box-shadow:var(--shadow)">';
-h+='💡 근력 퀘스트 완료 → 🪙 '+GP_STR+' GP &nbsp;|&nbsp; 유산소 미션 → 🪙 '+GP_STA+' GP</div>';
+h+='💡 근력 퀘스트 완료 → 💰 '+GP_STR+' GP &nbsp;|&nbsp; 유산소 미션 → 💰 '+GP_STA+' GP</div>';
 document.getElementById('app').innerHTML=h;
 }
 
@@ -610,7 +610,7 @@ item.unlocked=true;save();
 showConfetti();showConfetti(true);
 toast('🎉 '+item.name+' 해금 완료!');
 } else {
-toast('🪙 '+actual+' GP 투자!');
+toast('💰 '+actual+' GP 투자!');
 }
 render();
 }
@@ -622,7 +622,7 @@ h+='<h3>🎁 새 보상 등록</h3>';
 h+='<p>교환하고 싶은 보상을 등록하세요!<br>필요 GP를 설정할 수 있어요.</p>';
 h+='<div class="price-row"><span>🏷️</span><input type="text" id="itemName" placeholder="보상 이름"></div>';
 h+='<div class="price-row"><span>💰</span><input type="text" id="itemPrice" placeholder="가격 (선택)"></div>';
-h+='<div class="cost-input-row"><label>🪙 필요 GP</label><input type="number" id="itemGpCost" value="100" min="1"></div>';
+h+='<div class="cost-input-row"><label>💰 필요 GP</label><input type="number" id="itemGpCost" value="100" min="1"></div>';
 h+='<div style="margin-top:12px"><button class="btn-gold" onclick="triggerItemUpload()">📸 사진 선택 & 등록</button></div>';
 h+='<input type="file" id="itemFileInput" accept="image/*" style="display:none" onchange="startItemCrop(this)">';
 h+='<button class="btn-skip" style="margin-top:6px" onclick="closeModal()">취소</button>';
@@ -648,7 +648,7 @@ h+='<div class="modal-box">';
 h+='<h3>✏️ '+item.name+'</h3>';
 h+='<div class="price-row"><span>🏷️</span><input type="text" id="editName" value="'+item.name+'"></div>';
 h+='<div class="price-row"><span>💰</span><input type="text" id="editPrice" value="'+(item.price||'')+'"></div>';
-if(!item.unlocked) h+='<div class="cost-input-row"><label>🪙 필요 GP</label><input type="number" id="editGpCost" value="'+item.gpCost+'" min="1"></div>';
+if(!item.unlocked) h+='<div class="cost-input-row"><label>💰 필요 GP</label><input type="number" id="editGpCost" value="'+item.gpCost+'" min="1"></div>';
 h+='<div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">';
 h+='<button class="btn-gold" onclick="saveEditItem('+idx+')">저장</button>';
 h+='<button class="btn-ghost" style="color:var(--red)" onclick="deleteShopItem('+idx+')">🗑️ 삭제</button>';
@@ -842,7 +842,7 @@ var streak=getStreak();var pool=gpGain===GP_STR?COMMENTS_STR:COMMENTS_STA;
 var comment=pool[Math.floor(Math.random()*pool.length)];
 var h='<div class="complete-popup" onclick="if(event.target===this)closeCompletePopup()">';
 h+='<div class="complete-box">';
-h+='<div style="font-size:36px;margin-bottom:4px">🪙</div>';
+h+='<div style="font-size:36px;margin-bottom:4px">💰</div>';
 h+='<div class="gp-gain">+'+gpGain+' GP</div>';
 h+='<div class="gp-gain-sub">'+label+' — 성공 보수 수령!</div>';
 h+='<div style="margin:8px 0;display:flex;justify-content:center;gap:12px">';
