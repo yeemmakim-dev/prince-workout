@@ -57,13 +57,14 @@ body{font-family:'DotGothic16',monospace;background:var(--bg);color:var(--tx);ba
 
 /* === GUILD BOARD === */
 .guild-board{position:relative;margin:10px 0;width:100%;aspect-ratio:1.35/1;background:url('board.png') center/contain no-repeat;image-rendering:auto}
-.board-slots{position:absolute;top:30%;left:14%;right:14%;bottom:24%;display:flex;flex-direction:column;gap:6px;justify-content:center;align-items:center}
-.board-row{display:flex;gap:8px;justify-content:center;width:100%}
-.board-slot{flex:0 0 28%;text-align:center;padding:8px 4px;font-size:9px;color:#6B5B4B;line-height:1.2;cursor:default;transition:all .2s;background:rgba(245,239,224,.5);border:2px solid rgba(139,123,96,.3);border-radius:0;position:relative}
-.board-slot.now{background:rgba(212,160,23,.3);border:3px solid var(--gold);box-shadow:0 0 10px rgba(212,160,23,.6),inset 0 0 8px rgba(255,215,0,.12);color:#2C1810;transform:scale(1.05)}
-.board-slot.done-step{color:var(--green);opacity:.6}
-.board-slot .step-icon{font-size:18px;display:block;margin-bottom:2px}
-.board-slot .step-label{font-size:10px;font-family:'DotGothic16',monospace;letter-spacing:1px}
+.board-slots{position:absolute;top:32%;left:19%;right:19%;bottom:28%;display:flex;flex-direction:column;justify-content:center;gap:0}
+.board-slot{display:flex;align-items:center;justify-content:center;gap:4px;padding:2px 6px;font-size:11px;color:#3C2E1E;line-height:1.3;cursor:default;transition:all .2s;border-radius:0;font-family:'DotGothic16',monospace;text-align:center}
+.board-slot .step-icon{font-size:14px;flex-shrink:0}
+.board-slot .step-label{flex:1;letter-spacing:.5px}
+.board-slot .step-gp{font-size:10px;color:#5A4A30;white-space:nowrap}
+.board-slot.now{background:rgba(212,160,23,.35);border:2px solid var(--gold);box-shadow:0 0 10px rgba(212,160,23,.5);color:#2C1810;font-weight:bold}
+.board-slot.now .step-gp{color:var(--gold2)}
+.board-slot.done-step{color:#5B9A3A;opacity:.65}
 
 /* === WEIGHT === */
 .weight-row{display:flex;align-items:center;gap:8px;padding:6px 12px;margin:2px 0}
@@ -431,19 +432,13 @@ h+=renderGpBar();
 // Guild Board
 h+='<div class="guild-board"><div class="board-slots">';
 var ci=S.idx%5;
-h+='<div class="board-row">';
-for(var gi=0;gi<3;gi++){
+for(var gi=0;gi<5;gi++){
 var rt=getRoutineForCycle(S.idx-ci+gi);
 var cls=gi===ci?'now':(gi<ci?'done-step':'');
-h+='<div class="board-slot '+cls+'"><span class="step-icon">'+rt.icon+'</span><span class="step-label">'+rt.short+'</span></div>';
+var gp=rt.type==='cardio'?GP_STA:GP_STR;
+h+='<div class="board-slot '+cls+'">'+rt.icon+' '+rt.name+' — '+gp+' GP</div>';
 }
-h+='</div><div class="board-row">';
-for(var gi=3;gi<5;gi++){
-var rt=getRoutineForCycle(S.idx-ci+gi);
-var cls=gi===ci?'now':(gi<ci?'done-step':'');
-h+='<div class="board-slot '+cls+'"><span class="step-icon">'+rt.icon+'</span><span class="step-label">'+rt.short+'</span></div>';
-}
-h+='</div></div></div>';
+h+='</div></div>';
 h+='<div style="text-align:center;margin:2px 0 0"><div class="quest-type '+(r.type==='cardio'?'sta':'str')+'">'+(r.type==='cardio'?'🏃‍♂️ 유산소 미션 — 성공 보수 '+GP_STA+' GP':r.icon+' '+r.name+' — 성공 보수 '+GP_STR+' GP')+'</div></div>';
 // 교환 가능 보상 preview
 var exchangeable=S.shop.filter(function(it){return it.gpInvested<it.gpCost});
