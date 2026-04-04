@@ -410,7 +410,6 @@ function renderWorkout(){
 var r=curRoutine();
 var h='<div class="header"><h1>⚔️ 용사 길드 ⚔️</h1>';
 h+='<div class="header-sub">미션 게시판</div>';
-h+='<div class="quest-type '+(r.type==='cardio'?'sta':'str')+'">'+(r.type==='cardio'?'🏃‍♂️ 유산소 미션 — 성공 보수 '+GP_STA+' GP':r.icon+' '+r.name+' — 성공 보수 '+GP_STR+' GP')+'</div>';
 h+='</div>';
 h+=renderGpBar();
 // Cycle
@@ -422,6 +421,7 @@ var cls=gi===ci?'now':(gi<ci?'done-step':'');
 h+='<div class="cycle-step '+cls+'"><span class="step-icon">'+rt.icon+'</span>'+rt.short+'</div>';
 }
 h+='</div>';
+h+='<div style="text-align:center;margin:4px 0"><div class="quest-type '+(r.type==='cardio'?'sta':'str')+'">'+(r.type==='cardio'?'🏃‍♂️ 유산소 미션 — 성공 보수 '+GP_STA+' GP':r.icon+' '+r.name+' — 성공 보수 '+GP_STR+' GP')+'</div></div>';
 // Weight
 var lw=S.weights.length?S.weights[S.weights.length-1]:null;
 h+='<div class="weight-row"><div class="wv">'+(lw?lw.kg+'<span> kg</span>':'<span style="font-size:12px">몸무게</span>')+'</div>';
