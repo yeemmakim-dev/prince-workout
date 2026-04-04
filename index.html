@@ -441,7 +441,7 @@ function renderStatBar(){
 var h='<div class="stat-bar">';
 h+='<div class="stat-item"><span class="stat-icon">⚔️</span><span class="stat-label">근력</span><div class="stat-val str">'+S.str+'</div><div class="stat-avail">사용 가능: '+getAvailStr()+'</div></div>';
 h+='<div class="stat-item"><span class="stat-icon">🛡️</span><span class="stat-label">체력</span><div class="stat-val sta">'+S.sta+'</div><div class="stat-avail">사용 가능: '+getAvailSta()+'</div></div>';
-h+='<div class="stat-item"><span class="stat-icon">👑</span><span class="stat-label">LV</span><div class="stat-val lv">'+getLevel()+'</div><div class="stat-avail">🔥 '+getStreak()+'일 연속</div></div>';
+h+='<div class="stat-item"><span class="stat-icon">🔥</span><span class="stat-label">연속</span><div class="stat-val" style="color:var(--gold)">'+getStreak()+'</div><div class="stat-avail">일 연속 수련</div></div>';
 h+='</div>';
 return h;
 }
@@ -469,6 +469,39 @@ h+='<div class="wv">'+(latestW?latestW.kg+'<span> kg</span>':'<span style="font-
 h+='<input type="number" id="wi" placeholder="kg" step="0.1">';
 h+='<button onclick="saveW()">저장</button>';
 h+='</div>';
+
+// Shop items preview in workout tab
+if(S.shop.length>0){
+h+='<div style="margin:8px 0">';
+S.shop.forEach(function(item,i){
+var strDone=item.strInvested>=item.strCost;
+var staDone=item.staInvested>=item.staCost;
+var unlocked=strDone&&staDone;
+var strPct=Math.min(100,Math.round(item.strInvested/Math.max(1,item.strCost)*100));
+var staPct=Math.min(100,Math.round(item.staInvested/Math.max(1,item.staCost)*100));
+h+='<div class="shop-item'+(unlocked?' unlocked':'')+'" style="margin-bottom:8px">';
+h+='<div class="shop-item-top">';
+h+='<img class="shop-item-img'+(unlocked?'':' locked')+'" src="'+item.img+'" draggable="false">';
+h+='<div class="shop-item-info">';
+h+='<div class="shop-item-name" style="font-size:14px">'+(unlocked?'✨ ':'')+item.name+'</div>';
+if(item.price) h+='<div class="shop-item-price">💰 '+item.price+'</div>';
+h+='<div class="shop-item-cost">';
+h+='<span class="cost-str">⚔️ '+item.strInvested+'/'+item.strCost+'</span>';
+h+='<span class="cost-sta">🛡️ '+item.staInvested+'/'+item.staCost+'</span>';
+h+='</div>';
+h+='</div></div>';
+if(unlocked){
+h+='<div style="text-align:center;margin-top:6px"><span class="shop-unlocked-badge">🔓 해금 완료!</span></div>';
+} else {
+h+='<div style="display:flex;gap:4px;margin-top:6px">';
+h+='<div style="flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+strPct+'%;background:var(--str);border-radius:2px"></div></div>';
+h+='<div style="flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+staPct+'%;background:var(--sta);border-radius:2px"></div></div>';
+h+='</div>';
+}
+h+='</div>';
+});
+h+='</div>';
+}
 
 if(r.type==='cardio'){
 var picked=S.cardioChoice;
@@ -1069,9 +1102,8 @@ h+='<h3 style="font-size:16px;color:var(--c3)">'+label+' 완료!</h3>';
 h+='<div style="margin:10px 0;display:flex;justify-content:center;gap:14px">';
 h+='<div style="text-align:center"><div style="font-size:18px;font-weight:900;color:var(--str)">'+S.str+'</div><div style="font-size:10px;color:var(--th)">근력</div></div>';
 h+='<div style="text-align:center"><div style="font-size:18px;font-weight:900;color:var(--sta)">'+S.sta+'</div><div style="font-size:10px;color:var(--th)">체력</div></div>';
-h+='<div style="text-align:center"><div style="font-size:18px;font-weight:900;color:var(--gold)">Lv.'+getLevel()+'</div><div style="font-size:10px;color:var(--th)">LEVEL</div></div>';
+h+='<div style="text-align:center"><div style="font-size:18px;font-weight:900;color:var(--gold)">'+streak+'</div><div style="font-size:10px;color:var(--th)">🔥 연속</div></div>';
 h+='</div>';
-h+='<div style="font-size:12px;color:var(--tm);margin:6px 0">🔥 연속 '+streak+'일째</div>';
 h+='<div class="complete-comment">'+comment+'</div>';
 h+='<div class="done-btns" style="margin-top:10px;display:flex;flex-direction:column;gap:5px">';
 h+='<button class="btn-primary" style="padding:10px;font-size:13px" onclick="closeCompletePopup();nextRoutine(true)">바로 다음 하기 →</button>';
