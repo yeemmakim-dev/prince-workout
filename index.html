@@ -766,11 +766,6 @@ var lw=S.weights.length?S.weights[S.weights.length-1]:null;
 h+='<div class="wt-current"><div class="wt-num">'+(lw?lw.kg:'-')+'</div><div class="wt-unit">kg</div></div>';
 h+='<div class="wt-input-row"><input type="number" id="wti" placeholder="몸무게 입력" step="0.1"><button onclick="saveWt()">저장</button></div>';
 if(S.weights.length>=2) h+='<div class="wt-chart"><canvas id="wtCanvas" width="400" height="200"></canvas></div>';
-if(S.weights.length){
-h+='<div class="wt-list">';
-S.weights.slice(-15).reverse().forEach(function(w){h+='<div class="wt-item"><span>'+w.kg+' kg</span><span class="wt-d">'+w.date+'</span></div>';});
-h+='</div>';
-}
 // 캘린더
 h+='<div class="cal-month"><button class="cal-nav" onclick="calPrev()">‹</button>';
 h+='<span>'+(calYear)+'년 '+(calMonth+1)+'월</span>';
@@ -783,16 +778,19 @@ var last=new Date(calYear,calMonth+1,0).getDate();
 var today=new Date();
 var records={};
 S.history.forEach(function(item){if(item.year===calYear&&item.month===calMonth){if(!records[item.day])records[item.day]=[];records[item.day].push(item);}});
+var wtByDay={};
+S.weights.forEach(function(w){var parts=w.date.split('.');if(parseInt(parts[0])===calYear&&parseInt(parts[1])===(calMonth+1))wtByDay[parseInt(parts[2])]=w.kg;});
 for(var i=0;i<first;i++)h+='<div class="cal-day"></div>';
 for(var d=1;d<=last;d++){
 var isToday=calYear===today.getFullYear()&&calMonth===today.getMonth()&&d===today.getDate();
-var has=records[d];var sel=calSelected===d;
-h+='<div class="cal-day'+(isToday?' today':'')+(has?' has-record':'')+(sel?' selected':'')+'" onclick="selectDay('+d+')">'+d+'</div>';
+var has=records[d];var sel=calSelected===d;var wt=wtByDay[d];
+h+='<div class="cal-day'+(isToday?' today':'')+(has?' has-record':'')+(sel?' selected':'')+'" onclick="selectDay('+d+')">'+d+(wt?'<div style="font-size:8px;color:var(--gold2);line-height:1;margin-top:1px">'+wt+'</div>':'')+'</div>';
 }
 h+='</div>';
-if(calSelected&&records[calSelected]){
-h+='<div class="cal-detail"><div class="cal-detail-title">'+(calMonth+1)+'/'+calSelected+' 퀘스트 기록</div>';
-records[calSelected].forEach(function(item){
+if(calSelected&&(records[calSelected]||wtByDay[calSelected])){
+h+='<div class="cal-detail"><div class="cal-detail-title">'+(calMonth+1)+'/'+calSelected+' 기록</div>';
+if(wtByDay[calSelected])h+='<div class="cal-detail-item">⚖️ 몸무게: <b style="color:var(--gold2)">'+wtByDay[calSelected]+' kg</b></div>';
+if(records[calSelected])records[calSelected].forEach(function(item){
 h+='<div class="cal-detail-item">'+item.icon+' '+item.name+(item.gpEarned?' <span style="font-size:10px;color:var(--gold2)">+'+item.gpEarned+' GP</span>':'')+'</div>';
 });
 h+='</div>';
@@ -857,7 +855,7 @@ h+='</div>';
 document.getElementById('app').innerHTML=h;
 }
 function saveWt(){
-var v=parseFloat(document.getElementById('wti').value);if(!v||v<20||v>300)return;
+var v=parseFloat(document.getElementById('wti').value);if(!v||v<1||v>300)return;
 var now=new Date();S.weights.push({kg:v,date:(now.getFullYear())+'.'+(now.getMonth()+1)+'.'+now.getDate()});
 save();renderCalendar();toast(v+'kg 저장!');
 }
@@ -891,7 +889,9 @@ var minV=Math.min.apply(null,vals);var maxV=Math.max.apply(null,vals);
 var min=Math.floor(minV)-1;var max=Math.ceil(maxV)+1;var range=max-min||1;
 var padL=40,padR=10,padT=15,padB=25;var gw=W-padL-padR,gh=H-padT-padB;
 ctx.strokeStyle='rgba(200,184,154,0.3)';ctx.lineWidth=1;
-for(var v=min;v<=max;v++){var y=padT+(max-v)/range*gh;ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(W-padR,y);ctx.stroke();ctx.fillStyle='#A89880';ctx.font='10px sans-serif';ctx.textAlign='right';ctx.fillText(v,padL-4,y+3);}
+var step=1;if(range>10)step=2;if(range>20)step=5;if(range>50)step=10;
+min=Math.floor(minV/step)*step-step;max=Math.ceil(maxV/step)*step+step;range=max-min||1;
+for(var v=min;v<=max;v+=step){var y=padT+(max-v)/range*gh;ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(W-padR,y);ctx.stroke();ctx.fillStyle='#A89880';ctx.font='10px sans-serif';ctx.textAlign='right';ctx.fillText(v,padL-4,y+3);}
 ctx.beginPath();ctx.strokeStyle='#D4A017';ctx.lineWidth=2.5;ctx.lineJoin='round';
 data.forEach(function(w,i){var x=padL+i/(data.length-1)*gw;var y=padT+(max-w.kg)/range*gh;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});
 ctx.stroke();
