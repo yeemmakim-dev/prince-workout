@@ -448,7 +448,7 @@ h+='<div class="gp-streak"><div class="gp-streak-num">'+getStreak()+'</div><div 
 var exchangeable=S.shop.filter(function(it){return it.gpInvested<it.gpCost});
 if(exchangeable.length>0){
 h+='<div style="width:100%;border-top:1px solid rgba(200,168,112,.3);margin-top:8px;padding-top:8px">';
-h+='<div style="font-size:11px;color:var(--gold2);margin-bottom:6px;letter-spacing:1px;text-align:center">🎁 교환 가능 보상</div>';
+h+='<div style="font-size:13px;color:var(--gold2);margin-bottom:6px;letter-spacing:1px;text-align:center">🏆 교환 가능 보상</div>';
 exchangeable.forEach(function(item){
 var pct=Math.min(100,Math.round(item.gpInvested/Math.max(1,item.gpCost)*100));
 var remaining=Math.max(0,item.gpCost-item.gpInvested);
