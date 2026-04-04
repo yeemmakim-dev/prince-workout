@@ -37,7 +37,7 @@ body{font-family:'DotGothic16',monospace;background:var(--bg);color:var(--tx);ba
 .tab.active .tab-icon{animation:jelly .4s ease}
 
 /* === GP BAR === */
-.gp-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0;padding:10px 16px;background:#3A2A18;border:4px solid #6B5030;border-radius:0;box-shadow:var(--shadow),inset -2px -2px 0 rgba(0,0,0,.2),inset 2px 2px 0 rgba(255,255,255,.06)}
+.gp-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;margin:10px 0;padding:10px 16px;background:#3A2A18;border:4px solid #6B5030;border-radius:0;box-shadow:var(--shadow),inset -2px -2px 0 rgba(0,0,0,.2),inset 2px 2px 0 rgba(255,255,255,.06)}
 .gp-coin{font-size:28px;animation:floaty 2s ease-in-out infinite}
 .gp-info{text-align:left}
 .gp-label{font-size:10px;color:#C8A870;font-weight:400;letter-spacing:3px}
@@ -437,24 +437,33 @@ var gp=rt.type==='cardio'?GP_STA:GP_STR;
 h+='<div class="board-slot '+cls+'">'+rt.icon+' '+rt.name+' — '+gp+' GP</div>';
 }
 h+='</div></div>';
-h+=renderGpBar();
-h+='<div style="text-align:center;margin:2px 0 0"><div class="quest-type '+(r.type==='cardio'?'sta':'str')+'">'+(r.type==='cardio'?'🏃‍♂️ 유산소 미션 — 성공 보수 '+GP_STA+' GP':r.icon+' '+r.name+' — 성공 보수 '+GP_STR+' GP')+'</div></div>';
-// 교환 가능 보상 preview
+// GP + 교환 가능 보상 합친 카드
+h+='<div class="gp-bar">';
+h+='<div class="gp-coin">💰</div>';
+h+='<div class="gp-info"><div class="gp-label">GUILD POINT</div>';
+h+='<div class="gp-val">'+getAvailGp()+' <span style="font-size:14px;color:#C8A870">GP</span></div>';
+h+='<div class="gp-avail">총 '+S.gp+' GP 획득</div>';
+h+='</div>';
+h+='<div class="gp-streak"><div class="gp-streak-num">'+getStreak()+'</div><div class="gp-streak-label">🔥 연속</div></div>';
 var exchangeable=S.shop.filter(function(it){return it.gpInvested<it.gpCost});
 if(exchangeable.length>0){
-h+='<div class="mini-shop"><div style="font-size:12px;color:var(--gold2);margin-bottom:4px;letter-spacing:1px">🎁 교환 가능 보상</div>';
+h+='<div style="width:100%;border-top:1px solid rgba(200,168,112,.3);margin-top:8px;padding-top:8px">';
+h+='<div style="font-size:11px;color:var(--gold2);margin-bottom:6px;letter-spacing:1px;text-align:center">🎁 교환 가능 보상</div>';
 exchangeable.forEach(function(item){
 var pct=Math.min(100,Math.round(item.gpInvested/Math.max(1,item.gpCost)*100));
+var remaining=Math.max(0,item.gpCost-item.gpInvested);
 h+='<div class="mini-item">';
 h+='<img class="mini-item-img locked" src="'+item.img+'" draggable="false">';
 h+='<div class="mini-item-info"><div class="mini-item-name">'+item.name+'</div>';
 h+='<div class="mini-prog"><div class="mini-prog-fill" style="width:'+pct+'%"></div></div>';
 h+='</div>';
-h+='<div class="mini-item-gp">'+item.gpInvested+'/'+item.gpCost+'</div>';
+h+='<div class="mini-item-gp">'+item.gpInvested+'/'+item.gpCost+'<div style="font-size:9px;color:#C8A870;margin-top:1px">남은 '+remaining+' GP</div></div>';
 h+='</div>';
 });
 h+='</div>';
 }
+h+='</div>';
+h+='<div style="text-align:center;margin:2px 0 0"><div class="quest-type '+(r.type==='cardio'?'sta':'str')+'">'+(r.type==='cardio'?'🏃‍♂️ 유산소 미션 — 성공 보수 '+GP_STA+' GP':r.icon+' '+r.name+' — 성공 보수 '+GP_STR+' GP')+'</div></div>';
 // Exercises
 if(r.type==='cardio'){
 var picked=S.cardioChoice;
