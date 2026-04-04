@@ -423,23 +423,18 @@ h+='<div class="cycle-step '+cls+'"><span class="step-icon">'+rt.icon+'</span>'+
 }
 h+='</div>';
 h+='<div style="text-align:center;margin:2px 0 0"><div class="quest-type '+(r.type==='cardio'?'sta':'str')+'">'+(r.type==='cardio'?'🏃‍♂️ 유산소 미션 — 성공 보수 '+GP_STA+' GP':r.icon+' '+r.name+' — 성공 보수 '+GP_STR+' GP')+'</div></div>';
-// Weight
-var lw=S.weights.length?S.weights[S.weights.length-1]:null;
-h+='<div class="weight-row"><div class="wv">'+(lw?lw.kg+'<span> kg</span>':'<span style="font-size:12px">몸무게</span>')+'</div>';
-h+='<input type="number" id="wi" placeholder="kg" step="0.1"><button onclick="saveW()">저장</button></div>';
-// Mini shop preview
-if(S.shop.length>0){
-h+='<div class="mini-shop">';
-S.shop.forEach(function(item){
-var unlocked=item.gpInvested>=item.gpCost;
+// 교환 가능 보상 preview
+var exchangeable=S.shop.filter(function(it){return it.gpInvested<it.gpCost});
+if(exchangeable.length>0){
+h+='<div class="mini-shop"><div style="font-size:12px;color:var(--gold2);margin-bottom:4px;letter-spacing:1px">🎁 교환 가능 보상</div>';
+exchangeable.forEach(function(item){
 var pct=Math.min(100,Math.round(item.gpInvested/Math.max(1,item.gpCost)*100));
-h+='<div class="mini-item'+(unlocked?' unlocked':'')+'">';
-h+='<img class="mini-item-img'+(unlocked?'':' locked')+'" src="'+item.img+'" draggable="false">';
-h+='<div class="mini-item-info"><div class="mini-item-name">'+(unlocked?'✨ ':'')+item.name+'</div>';
-if(unlocked) h+='<div style="font-size:10px;color:var(--gold2);font-weight:700">🏆 보상 수령 완료</div>';
-else{h+='<div class="mini-prog"><div class="mini-prog-fill" style="width:'+pct+'%"></div></div>';}
+h+='<div class="mini-item">';
+h+='<img class="mini-item-img locked" src="'+item.img+'" draggable="false">';
+h+='<div class="mini-item-info"><div class="mini-item-name">'+item.name+'</div>';
+h+='<div class="mini-prog"><div class="mini-prog-fill" style="width:'+pct+'%"></div></div>';
 h+='</div>';
-if(!unlocked) h+='<div class="mini-item-gp">'+item.gpInvested+'/'+item.gpCost+'</div>';
+h+='<div class="mini-item-gp">'+item.gpInvested+'/'+item.gpCost+'</div>';
 h+='</div>';
 });
 h+='</div>';
@@ -918,7 +913,6 @@ if(curTab!==1){curTab=1;switchTab(1);}else render();
 }
 
 function closeModal(){document.getElementById('modal').innerHTML=''}
-function saveW(){var v=parseFloat(document.getElementById('wi').value);if(!v||v<20||v>300)return;var now=new Date();S.weights.push({kg:v,date:(now.getFullYear())+'.'+(now.getMonth()+1)+'.'+now.getDate()});save();render();toast(v+'kg 저장!');}
 function showConfetti(fromBottom){
 var c=document.createElement('div');c.className='confetti';
 var colors=['#D4A017','#FFD700','#E8C020','#4A6FA5','#5B9A3A','#C0392B','#FF8C42'];
