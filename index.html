@@ -345,7 +345,7 @@ return list;
 function generateCardio(idx){
 var seed=idx*4219+17;var rng=seededRand(seed);
 var pick=CARDIO_OPTIONS[Math.floor(rng()*CARDIO_OPTIONS.length)];
-return {type:'cardio',name:pick.name,icon:'🏃‍♂️',short:'유산소',dur:pick.dur,desc:pick.desc};
+return {type:'cardio',name:'유산소 퀘스트',icon:'🏃‍♂️',short:'유산소',dur:pick.dur,desc:pick.desc,cardioName:pick.name};
 }
 var CYCLE_PATTERN=['strength','cardio','strength','cardio','strength'];
 function getRoutineForCycle(gi){var pos=gi%5;return CYCLE_PATTERN[pos]==='cardio'?generateCardio(gi):generateRoutine(gi)}
