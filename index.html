@@ -364,6 +364,7 @@ if(!S.customPool)S.customPool=[];
 if(!S.gp)S.gp=0;
 if(!S.spentGp)S.spentGp=0;
 if(!S.shop)S.shop=[];
+if(!S.archivedShop)S.archivedShop=[];
 if(!S.config)S.config={sets:3,reps:10,coreSets:2,coreReps:10,cardioDur:25};
 if(!S.customCardio)S.customCardio=[];
 if(S.strChoice===undefined)S.strChoice=null;
@@ -598,6 +599,7 @@ h+='<div class="shop-item-info"><div class="shop-item-name">✨ '+item.name+'</d
 if(item.price)h+='<div class="shop-item-price">💰 '+item.price+'</div>';
 h+='</div>';
 h+='<button onclick="editShopItem('+idx+')" style="background:none;border:none;color:var(--th);cursor:pointer;font-size:11px;padding:4px">✏️</button>';
+h+='<button onclick="archiveShopItem('+idx+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:11px;padding:4px">🗑️</button>';
 h+='</div>';
 h+='<div style="text-align:center;margin-top:6px"><span class="shop-unlocked-badge">🔓 해금 완료!</span></div>';
 h+='</div>';
@@ -644,9 +646,35 @@ h+='</div>';
 h+='<button class="shop-add-btn" onclick="showAddItemModal()">+ 새 보상 등록하기</button>';
 h+='<div style="margin-top:12px;padding:10px;background:var(--sf);border:2px solid var(--border);border-radius:var(--r);font-size:11px;color:var(--th);text-align:center;box-shadow:var(--shadow)">';
 h+='💡 근력 퀘스트 완료 → 💰 '+GP_STR+' GP &nbsp;|&nbsp; 유산소 퀘스트 → 💰 '+GP_STA+' GP</div>';
+// 교환 완료 보상 아카이브
+var archived=(S.archivedShop||[]);
+if(archived.length>0){
+h+='<div style="margin:12px 0;padding:12px;background:var(--card);border:3px solid var(--border);border-radius:0;box-shadow:var(--shadow)">';
+h+='<div style="font-size:13px;color:var(--gold2);margin-bottom:8px;text-align:center;font-family:\'DotGothic16\',monospace;letter-spacing:2px">🏆 교환 완료 보상</div>';
+h+='<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center">';
+archived.forEach(function(item){
+h+='<div style="text-align:center;width:80px">';
+h+='<div style="position:relative;display:inline-block">';
+h+='<img src="'+item.img+'" style="width:70px;height:70px;object-fit:cover;border:2px solid var(--border);border-radius:0;filter:grayscale(40%);opacity:.8" draggable="false">';
+h+='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-15deg);background:rgba(192,57,43,.85);color:#fff;font-size:11px;font-weight:bold;padding:2px 8px;border:2px solid #a93226;border-radius:0;font-family:\'DotGothic16\',monospace;white-space:nowrap;letter-spacing:2px">품절</div>';
+h+='</div>';
+h+='<div style="font-size:11px;color:var(--tx);margin-top:4px">'+item.name+'</div>';
+h+='</div>';
+});
+h+='</div></div>';
+}
 document.getElementById('app').innerHTML=h;
 }
 
+function archiveShopItem(idx){
+var item=S.shop[idx];
+if(!item||!item.unlocked)return;
+if(!confirm(item.name+' 을(를) 아카이브로 이동할까요?'))return;
+if(!S.archivedShop)S.archivedShop=[];
+S.archivedShop.push({name:item.name,img:item.img,price:item.price,gpCost:item.gpCost});
+S.shop.splice(idx,1);save();render();
+toast('📦 '+item.name+' 아카이브 완료!');
+}
 function investGp(idx,amount){
 var item=S.shop[idx];
 var actual=Math.min(amount,getAvailGp(),item.gpCost-item.gpInvested);
@@ -731,25 +759,8 @@ h+='<div style="font-size:13px;color:var(--gold2);margin-bottom:6px;text-align:c
 h+='<div style="display:flex;justify-content:space-around;font-size:12px">';
 h+='<div style="text-align:center"><div style="color:var(--gold2);font-size:18px;font-family:\'DotGothic16\',monospace">'+S.gp+'</div><div style="color:var(--th);font-size:10px">총 GP</div></div>';
 h+='<div style="text-align:center"><div style="color:var(--gold2);font-size:18px;font-family:\'DotGothic16\',monospace">'+S.history.length+'</div><div style="color:var(--th);font-size:10px">총 퀘스트</div></div>';
-h+='<div style="text-align:center"><div style="color:var(--gold2);font-size:18px;font-family:\'DotGothic16\',monospace">'+S.shop.filter(function(i){return i.unlocked}).length+'/'+S.shop.length+'</div><div style="color:var(--th);font-size:10px">해금</div></div>';
+h+='<div style="text-align:center"><div style="color:var(--gold2);font-size:18px;font-family:\'DotGothic16\',monospace">'+(S.shop.filter(function(i){return i.unlocked}).length+(S.archivedShop||[]).length)+'/'+(S.shop.length+(S.archivedShop||[]).length)+'</div><div style="color:var(--th);font-size:10px">해금</div></div>';
 h+='</div></div>';
-// 해금 완료 보상 아카이브
-var archived=S.shop.filter(function(it){return it.unlocked});
-if(archived.length>0){
-h+='<div style="margin:10px 0;padding:12px;background:var(--card);border:3px solid var(--border);border-radius:0;box-shadow:var(--shadow)">';
-h+='<div style="font-size:13px;color:var(--gold2);margin-bottom:8px;text-align:center;font-family:\'DotGothic16\',monospace;letter-spacing:2px">🏆 교환 완료 보상</div>';
-h+='<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center">';
-archived.forEach(function(item){
-h+='<div style="text-align:center;width:80px">';
-h+='<div style="position:relative;display:inline-block">';
-h+='<img src="'+item.img+'" style="width:70px;height:70px;object-fit:cover;border:2px solid var(--border);border-radius:0;filter:grayscale(40%);opacity:.8" draggable="false">';
-h+='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-15deg);background:rgba(192,57,43,.85);color:#fff;font-size:11px;font-weight:bold;padding:2px 8px;border:2px solid #a93226;border-radius:0;font-family:\'DotGothic16\',monospace;white-space:nowrap;letter-spacing:2px">품절</div>';
-h+='</div>';
-h+='<div style="font-size:11px;color:var(--tx);margin-top:4px">'+item.name+'</div>';
-h+='</div>';
-});
-h+='</div></div>';
-}
 // 몸무게 기록
 var lw=S.weights.length?S.weights[S.weights.length-1]:null;
 h+='<div class="wt-current"><div class="wt-num">'+(lw?lw.kg:'-')+'</div><div class="wt-unit">kg</div></div>';
