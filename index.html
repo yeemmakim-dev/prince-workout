@@ -322,7 +322,7 @@ function seededRand(seed){return function(){seed=(seed*16807+0)%2147483647;retur
 function pickRandom(arr,n,rng){var a=arr.slice();var res=[];for(var i=0;i<n&&a.length;i++){var idx=Math.floor(rng()*a.length);res.push(a.splice(idx,1)[0])}return res}
 function generateRoutine(idx){
 var seed=idx*7919+31;var rng=seededRand(seed);
-var labels=['A','C','B'];var icons=['⚔️','🗡️','🛡️'];var li=idx%3;
+var labels=['A','B','C'];var icons=['⚔️','🛡️','🗡️'];var posInCycle=idx%5;var strMap={0:0,2:1,4:2};var li=strMap[posInCycle]!==undefined?strMap[posInCycle]:0;
 var base=[pickRandom(POOL.compound,1,rng)[0],pickRandom(POOL.hinge,1,rng)[0],pickRandom(rng()<0.5?POOL.pull:POOL.push,1,rng)[0],pickRandom(POOL.core,1,rng)[0]];
 var exercises=base.map(function(ex,i){var key=idx+'_'+i;var e=S.swapped&&S.swapped[key]?S.swapped[key]:ex;
 var c=S.config||{sets:3,reps:10,coreSets:2,coreReps:10};
