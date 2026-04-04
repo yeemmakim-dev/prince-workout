@@ -686,10 +686,29 @@ S.shop.splice(idx,1);save();closeModal();render();toast('삭제 완료!');
 
 // === CALENDAR ===
 function renderCalendar(){
-var h='<div class="cal-month"><button class="cal-nav" onclick="calPrev()">‹</button>';
+var h='';
+// 길드 누적 기록
+h+='<div style="margin:10px 0;padding:12px;background:var(--card);border:3px solid var(--border);border-radius:0;box-shadow:var(--shadow)">';
+h+='<div style="font-size:13px;color:var(--gold2);margin-bottom:6px;text-align:center;font-family:\'DotGothic16\',monospace;letter-spacing:2px">📊 길드 누적 기록</div>';
+h+='<div style="display:flex;justify-content:space-around;font-size:12px">';
+h+='<div style="text-align:center"><div style="color:var(--gold2);font-size:18px;font-family:\'DotGothic16\',monospace">'+S.gp+'</div><div style="color:var(--th);font-size:10px">총 GP</div></div>';
+h+='<div style="text-align:center"><div style="color:var(--gold2);font-size:18px;font-family:\'DotGothic16\',monospace">'+S.history.length+'</div><div style="color:var(--th);font-size:10px">총 퀘스트</div></div>';
+h+='<div style="text-align:center"><div style="color:var(--gold2);font-size:18px;font-family:\'DotGothic16\',monospace">'+S.shop.filter(function(i){return i.unlocked}).length+'/'+S.shop.length+'</div><div style="color:var(--th);font-size:10px">해금</div></div>';
+h+='</div></div>';
+// 몸무게 기록
+var lw=S.weights.length?S.weights[S.weights.length-1]:null;
+h+='<div class="wt-current"><div class="wt-num">'+(lw?lw.kg:'-')+'</div><div class="wt-unit">kg</div></div>';
+h+='<div class="wt-input-row"><input type="number" id="wti" placeholder="몸무게 입력" step="0.1"><button onclick="saveWt()">저장</button></div>';
+if(S.weights.length>=2) h+='<div class="wt-chart"><canvas id="wtCanvas" width="400" height="200"></canvas></div>';
+if(S.weights.length){
+h+='<div class="wt-list">';
+S.weights.slice(-15).reverse().forEach(function(w){h+='<div class="wt-item"><span>'+w.kg+' kg</span><span class="wt-d">'+w.date+'</span></div>';});
+h+='</div>';
+}
+// 캘린더
+h+='<div class="cal-month"><button class="cal-nav" onclick="calPrev()">‹</button>';
 h+='<span>'+(calYear)+'년 '+(calMonth+1)+'월</span>';
 h+='<button class="cal-nav" onclick="calNext()">›</button></div>';
-h+=renderGpBar();
 var days=['일','월','화','수','목','금','토'];
 h+='<div class="cal-grid">';
 days.forEach(function(d){h+='<div class="cal-day-header">'+d+'</div>'});
@@ -714,24 +733,6 @@ h+='</div>';
 } else if(calSelected){h+='<div class="cal-detail"><div class="cal-detail-item" style="color:var(--th)">기록 없음</div></div>';}
 var mc=0;S.history.forEach(function(item){if(item.year===calYear&&item.month===calMonth)mc++});
 h+='<div style="text-align:center;margin:12px 0;font-size:12px;color:var(--tm)">이번 달 총 <b style="color:var(--gold2)">'+mc+'회</b> 퀘스트 수행</div>';
-// 길드 누적 기록
-h+='<div style="margin:14px 0;padding:12px;background:var(--card);border:3px solid var(--border);border-radius:0;box-shadow:var(--shadow)">';
-h+='<div style="font-size:13px;color:var(--gold2);margin-bottom:6px;text-align:center;font-family:\'DotGothic16\',monospace;letter-spacing:2px">📊 길드 누적 기록</div>';
-h+='<div style="display:flex;justify-content:space-around;font-size:12px">';
-h+='<div style="text-align:center"><div style="color:var(--gold2);font-size:18px;font-family:\'DotGothic16\',monospace">'+S.gp+'</div><div style="color:var(--th);font-size:10px">총 GP</div></div>';
-h+='<div style="text-align:center"><div style="color:var(--gold2);font-size:18px;font-family:\'DotGothic16\',monospace">'+S.history.length+'</div><div style="color:var(--th);font-size:10px">총 퀘스트</div></div>';
-h+='<div style="text-align:center"><div style="color:var(--gold2);font-size:18px;font-family:\'DotGothic16\',monospace">'+S.shop.filter(function(i){return i.unlocked}).length+'/'+S.shop.length+'</div><div style="color:var(--th);font-size:10px">해금</div></div>';
-h+='</div></div>';
-// 몸무게 기록
-var lw=S.weights.length?S.weights[S.weights.length-1]:null;
-h+='<div class="wt-current"><div class="wt-num">'+(lw?lw.kg:'-')+'</div><div class="wt-unit">kg</div></div>';
-h+='<div class="wt-input-row"><input type="number" id="wti" placeholder="몸무게 입력" step="0.1"><button onclick="saveWt()">저장</button></div>';
-if(S.weights.length>=2) h+='<div class="wt-chart"><canvas id="wtCanvas" width="400" height="200"></canvas></div>';
-if(S.weights.length){
-h+='<div class="wt-list">';
-S.weights.slice(-15).reverse().forEach(function(w){h+='<div class="wt-item"><span>'+w.kg+' kg</span><span class="wt-d">'+w.date+'</span></div>';});
-h+='</div>';
-}
 document.getElementById('app').innerHTML=h;
 if(S.weights.length>=2)drawChart();
 }
@@ -744,7 +745,6 @@ function renderWeight(){
 var c=S.config||{sets:3,reps:10,coreSets:2,coreReps:10};
 var h='<div class="header"><h1>⚙️ 설정</h1>';
 h+='<div class="header-sub">운동 설정 · 데이터 관리</div></div>';
-h+=renderGpBar();
 // 운동 설정
 h+='<div style="margin:12px 0;padding:14px;background:var(--card);border:3px solid var(--border);border-radius:0;box-shadow:var(--shadow)">';
 h+='<div style="font-size:13px;color:var(--gold2);margin-bottom:10px;text-align:center;letter-spacing:2px">⚔️ 운동 설정</div>';
