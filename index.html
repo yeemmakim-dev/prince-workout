@@ -438,6 +438,8 @@ var gp=rt.type==='cardio'?GP_STA:GP_STR;
 h+='<div class="board-slot '+cls+'">'+rt.icon+' '+rt.name+' — '+gp+' GP</div>';
 }
 h+='</div></div>';
+var guildMsgs=['오늘도 힘내자, 용사!','꾸준함이 최고의 무기다','레벨업까지 조금만 더!','길드가 응원하고 있어!','쉬는 것도 훈련이다','어제보다 강해진 오늘','포기하지 않는 자가 진정한 용사','한 걸음씩, 꾸준히','오늘의 땀이 내일의 힘이 된다','용사여, 전진하라!','작은 습관이 큰 변화를 만든다','너의 한계는 네가 정하는 거야'];
+h+='<div style="text-align:center;margin:-4px 0 10px;font-size:13px;color:var(--tm);font-family:\'DotGothic16\',monospace;letter-spacing:1px">💬 길드마스터:'+guildMsgs[Math.floor(Math.random()*guildMsgs.length)]+'</div>';
 // GP + 교환 가능 보상 합친 카드
 h+='<div class="gp-bar">';
 h+='<div style="display:flex;align-items:center;gap:6px">';
@@ -564,8 +566,7 @@ var next=getRoutineForCycle(S.idx+1);
 h+='<div class="done-card"><h2>⚔️ 퀘스트 완료!</h2>';
 h+='<p>다음: <strong>'+next.icon+' '+next.name+'</strong></p>';
 h+='<div class="done-btns">';
-h+='<button class="btn-gold" onclick="nextRoutine(true)">바로 다음 미션 →</button>';
-h+='<button class="btn-ghost" onclick="nextRoutine(false)">다음에 할게요</button>';
+h+='<button class="btn-gold" onclick="nextRoutine(true)">다음 미션 →</button>';
 h+='<button class="btn-skip" onclick="goBack()">↩ 되돌리기</button>';
 h+='</div></div>';
 }
@@ -1020,8 +1021,7 @@ h+='<div style="text-align:center;padding:6px 12px;background:var(--sf);border-r
 h+='</div>';
 h+='<div class="complete-comment">📜 '+comment+'</div>';
 h+='<div class="done-btns" style="margin-top:8px;gap:4px">';
-h+='<button class="btn-gold" style="padding:10px;font-size:13px" onclick="closeCompletePopup();nextRoutine(true)">바로 다음 미션 →</button>';
-h+='<button class="btn-ghost" style="padding:8px;font-size:12px" onclick="closeCompletePopup();nextRoutine(false)">다음에 할게요</button>';
+h+='<button class="btn-gold" style="padding:10px;font-size:13px" onclick="closeCompletePopup();nextRoutine(true)">다음 미션 →</button>';
 h+='<button class="btn-skip" style="padding:6px;font-size:11px" onclick="closeCompletePopup();goBack()">↩ 되돌리기</button>';
 h+='</div></div></div>';
 document.getElementById('modal').innerHTML=h;showConfetti();
