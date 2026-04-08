@@ -912,11 +912,16 @@ requestWake();
 var restTimer=null;var restEi=-1,restSi=-1;var restStart=0;var REST_SEC=60;
 var audioCtx=null;
 function playAlarm(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();var ctx=audioCtx;if(ctx.state==='suspended')ctx.resume();
-// 칼싸움 — 메탈릭 클랭 (노이즈 + 밴드패스 필터)
-function clang(t,freq){var buf=ctx.createBuffer(1,ctx.sampleRate*0.25,ctx.sampleRate);var d=buf.getChannelData(0);for(var i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2);var src=ctx.createBufferSource();src.buffer=buf;var bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=freq;bp.Q.value=8;var g=ctx.createGain();g.gain.setValueAtTime(0.6,ctx.currentTime+t);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.25);src.connect(bp);bp.connect(g);g.connect(ctx.destination);src.start(ctx.currentTime+t);
-var o=ctx.createOscillator(),og=ctx.createGain();o.type='sawtooth';o.frequency.setValueAtTime(freq*2,ctx.currentTime+t);o.frequency.exponentialRampToValueAtTime(freq,ctx.currentTime+t+0.1);og.gain.setValueAtTime(0.2,ctx.currentTime+t);og.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.15);o.connect(og);og.connect(ctx.destination);o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+0.16);}
-clang(0,2200);clang(0.18,1800);clang(0.38,2600);
-}catch(e){}if(navigator.vibrate)navigator.vibrate([120,80,120,80,180]);}
+// 전투 팡파레 — 크고 웅장한 브라스 + 드럼 히트
+var master=ctx.createGain();master.gain.value=1.0;master.connect(ctx.destination);
+function brass(t,f,d){var o=ctx.createOscillator(),o2=ctx.createOscillator(),g=ctx.createGain();o.type='sawtooth';o2.type='square';o.frequency.value=f;o2.frequency.value=f*2;o.connect(g);o2.connect(g);g.connect(master);g.gain.setValueAtTime(0,ctx.currentTime+t);g.gain.linearRampToValueAtTime(0.5,ctx.currentTime+t+0.03);g.gain.setValueAtTime(0.5,ctx.currentTime+t+d*0.7);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+d);o.start(ctx.currentTime+t);o2.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+d+0.02);o2.stop(ctx.currentTime+t+d+0.02);}
+function drum(t){var buf=ctx.createBuffer(1,ctx.sampleRate*0.2,ctx.sampleRate);var d=buf.getChannelData(0);for(var i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,3);var src=ctx.createBufferSource();src.buffer=buf;var g=ctx.createGain();g.gain.setValueAtTime(0.8,ctx.currentTime+t);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.2);src.connect(g);g.connect(master);src.start(ctx.currentTime+t);
+var o=ctx.createOscillator(),og=ctx.createGain();o.type='sine';o.frequency.setValueAtTime(150,ctx.currentTime+t);o.frequency.exponentialRampToValueAtTime(40,ctx.currentTime+t+0.15);og.gain.setValueAtTime(0.9,ctx.currentTime+t);og.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.2);o.connect(og);og.connect(master);o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+0.22);}
+// 따-다-단! 팡파레
+drum(0);brass(0,261.63,0.2);
+drum(0.22);brass(0.22,261.63,0.2);
+drum(0.44);brass(0.44,392,0.6);brass(0.44,523.25,0.6);brass(0.44,659.25,0.6);
+}catch(e){}if(navigator.vibrate)navigator.vibrate([200,80,200,80,500]);}
 function startRest(ei,si){clearInterval(restTimer);restEi=ei;restSi=si;restStart=Date.now();requestWake();if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}restTimer=setInterval(function(){var el=Math.floor((Date.now()-restStart)/1000);if(el>=REST_SEC){clearInterval(restTimer);updateRestUI(REST_SEC);restTimer=null;playAlarm();}else updateRestUI(el);},200);}
 function restoreRestUI(){if(!restTimer||restEi<0)return;var el=Math.floor((Date.now()-restStart)/1000);updateRestUI(el>=REST_SEC?REST_SEC:el);}
 function updateRestUI(sec){var el=document.getElementById('rest-'+restEi+'-'+restSi);if(!el)return;var pct=Math.min(100,Math.round(sec/REST_SEC*100));var left=REST_SEC-sec;var bar=el.querySelector('.rest-timer-fill');var txt=el.querySelector('.rest-timer-text');if(bar)bar.style.width=pct+'%';if(txt)txt.textContent=left>0?left+'s':'GO!';if(left<=0)el.classList.add('done-timer');}
